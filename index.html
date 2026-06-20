@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRAME</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:      #E9E2D4;
+  --surface: #F1EAD8;
+  --cement:  #C2BBB1;
+  --cement2: #8F887F;
+  --brown:   #6A4830;
+  --brown-lt:rgba(106,72,48,0.11);
+  --ink:     #1C1810;
+  --ink2:    #48413A;
+  --ink3:    #8A837A;
+  --orange:  #E55A00;
+  --orange-d:#C04800;
+  --white:   #FDFAF3;
+  --r:       2px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:'Lora',Georgia,serif;min-height:100vh;overflow-x:hidden}
+
+/* grain overlay */
+#grain{position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.028}
+
+/* ─── HEADER ─────────────────── */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.9rem 2rem;
+  background:rgba(233,226,212,0.88);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--cement);
+}
+.logo{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:1.35rem;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--ink);user-select:none;
+}
+.logo span{color:var(--orange)}
+.h-mid{
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.7rem;letter-spacing:0.1em;color:var(--cement2);
+  display:flex;align-items:center;gap:1rem;
+}
+#live-clock{font-weight:600;color:var(--ink3)}
+.h-right{display:flex;align-items:center;gap:0.9rem}
+
+.sync{display:flex;align-items:center;gap:0.38rem;font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3)}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--cement);transition:background .3s}
+.sdot.active{background:var(--orange);animation:pulse 1s ease infinite}
+.sdot.ok{background:#6BAA6B}.sdot.err{background:#CC4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
+
+.icon-btn{background:none;border:none;cursor:pointer;padding:4px;color:var(--cement2);transition:color .15s;line-height:1;display:flex;align-items:center}
+.icon-btn:hover{color:var(--ink)}
+.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.btn-new{background:var(--ink);color:var(--white);border:none;border-radius:var(--r);padding:0.48rem 0.95rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.07em;text-transform:uppercase;transition:background .15s}
+.btn-new:hover{background:var(--brown)}
+
+/* ─── SETTINGS DRAWER ─────────────────── */
+#settings-drawer{
+  position:fixed;top:0;right:0;bottom:0;z-index:300;width:300px;
+  background:var(--surface);border-left:1px solid var(--cement);
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.22,1,.36,1);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+#settings-drawer.open{transform:translateX(0)}
+.dr-head{padding:1.1rem 1.4rem;border-bottom:1px solid var(--cement);border-top:3px solid var(--brown);display:flex;align-items:center;justify-content:space-between}
+.dr-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink2)}
+.dr-body{padding:1.4rem}
+.field{margin-bottom:1.15rem}
+.flbl{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--cement2);margin-bottom:0.32rem}
+.finput{width:100%;border:1px solid var(--cement);border-radius:var(--r);padding:0.58rem 0.7rem;font-family:'Barlow Condensed',sans-serif;font-size:0.92rem;color:var(--ink);background:var(--white);outline:none;transition:border-color .15s}
+.finput:focus{border-color:var(--orange)}
+.fhint{font-size:0.68rem;color:var(--ink3);margin-top:0.28rem;font-style:italic}
+.fhint a{color:var(--orange)}
+.btn-save{width:100%;padding:0.75rem;margin-top:0.4rem;background:var(--orange);color:#fff;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.82rem;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background .15s}
+.btn-save:hover{background:var(--orange-d)}
+.btn-disc{width:100%;padding:0.55rem;margin-top:0.65rem;background:none;color:var(--cement2);border:1px solid var(--cement);border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:color .15s,border-color .15s;display:none}
+.btn-disc:hover{color:var(--ink);border-color:var(--ink)}
+.dr-err{display:none;margin-top:0.7rem;padding:0.55rem 0.7rem;background:#FFF0E8;border:1px solid #FFD0B0;border-radius:var(--r);font-size:0.75rem;color:#CC4400}
+.drawer-back{position:fixed;inset:0;z-index:299;display:none}
+.drawer-back.open{display:block}
+
+/* ─── WALL ─────────────────── */
+#wall{padding:4.8rem 1.8rem 5rem;max-width:1320px;margin:0 auto}
+.wall-meta{margin-bottom:1.8rem;display:flex;align-items:center;gap:1.5rem;font-family:'Barlow Condensed',sans-serif;font-weight:400;font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cement2)}
+.wall-meta b{color:var(--orange);font-weight:700}
+.meta-div{color:var(--cement);user-select:none}
+
+/* masonry */
+.grid{column-count:3;column-gap:0.9rem}
+@media(max-width:800px){.grid{column-count:2}}
+@media(max-width:480px){.grid{column-count:1}#wall{padding:4.5rem 1rem 4rem}header{padding:0.8rem 1rem}.h-mid{display:none}}
+
+/* ─── CARD BASE ─────────────────── */
+.card{
+  break-inside:avoid;position:relative;
+  margin-bottom:0.9rem;overflow:hidden;
+  background:var(--white);
+  border:1px solid var(--brown-lt);
+  border-left:2px solid transparent;
+  border-radius:var(--r);
+  box-shadow:0 1px 5px rgba(28,24,16,0.05);
+  transition:border-left-color .2s,box-shadow .2s,transform .2s;
+  animation:cardUp .36s ease both;
+}
+.card:hover{border-left-color:var(--orange);box-shadow:0 4px 18px rgba(28,24,16,0.1);transform:translateY(-2px)}
+@keyframes cardUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* pin dot at top */
+.card::before{
+  content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);
+  width:6px;height:6px;border-radius:50%;
+  background:var(--orange);opacity:0;
+  transition:opacity .2s;z-index:2;
+}
+.card:hover::before{opacity:0.7}
+
+/* day-part stamp */
+.daypart{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:0.52rem;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--cement);
+  background:rgba(194,187,177,0.18);
+  padding:1px 5px;border-radius:1px;
+}
+.card-date{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:0.56rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--brown);opacity:0.6}
+.card-meta{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+.del-btn{background:none;border:none;cursor:pointer;color:var(--cement);font-size:0.72rem;opacity:0;transition:opacity .15s,color .15s;padding:1px;flex-shrink:0}
+.card:hover .del-btn{opacity:1}
+.del-btn:hover{color:#CC3333}
+
+/* ─── CARD: PHOTO TYPE ─────────────────── */
+.card-photo .photo-img{
+  width:100%;display:block;
+  object-fit:cover;cursor:zoom-in;
+  border-bottom:2px solid var(--orange);
+}
+.card-photo .photo-body{padding:0.8rem 1rem 1rem}
+.card-photo .photo-hero{
+  font-size:0.9rem;line-height:1.6;
+  color:var(--ink);font-style:italic;
+  margin-bottom:0.6rem;
+}
+.card-photo .photo-footer{display:flex;align-items:center;justify-content:space-between;margin-top:0.5rem}
+
+/* ─── CARD: ONELINER TYPE ─────────────────── */
+.card-liner{text-align:center}
+.card-liner .liner-body{
+  padding:1.5rem 1.2rem 1rem;
+}
+.card-liner .liner-text{
+  font-size:1.25rem;line-height:1.45;
+  font-style:italic;font-weight:500;color:var(--ink);
+  margin-bottom:0.85rem;
+}
+.card-liner .liner-footer{
+  padding:0 1.2rem 0.9rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+/* ─── CARD: TEXT TYPE ─────────────────── */
+.card-text-type .text-hero{
+  padding:1rem 1.1rem 0.7rem;
+  font-size:1.05rem;line-height:1.5;
+  font-style:italic;font-weight:500;color:var(--ink);
+  border-bottom:1px solid rgba(194,187,177,0.4);
+}
+.card-text-type .text-rest{
+  padding:0.65rem 1.1rem 0.7rem;
+  font-size:0.85rem;line-height:1.72;
+  color:var(--ink3);
+}
+.card-text-type .text-footer{
+  padding:0 1.1rem 0.85rem;
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+/* ─── EMPTY ─────────────────── */
+.empty{padding:6rem 2rem;text-align:center}
+.empty-mark{font-family:'Barlow Condensed',sans-serif;font-weight:300;font-size:2.5rem;color:var(--cement);letter-spacing:0.1em;margin-bottom:1rem;line-height:1}
+.empty-h{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.25rem;color:var(--ink2);margin-bottom:0.4rem}
+.empty-s{font-size:0.83rem;color:var(--ink3);font-style:italic}
+.empty-s span{color:var(--orange);font-style:normal;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+
+/* ─── LOADING ─────────────────── */
+.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.7rem;height:55vh}
+.spinner{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--cement);border-top-color:var(--orange);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-wrap span{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink3)}
+
+/* ─── COMPOSE ─────────────────── */
+#compose{position:fixed;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center;padding:1.5rem}
+#compose.open{display:flex}
+.c-back{position:absolute;inset:0;background:rgba(28,24,16,0.16);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.c-panel{
+  position:relative;z-index:1;width:100%;max-width:560px;
+  background:var(--white);border-radius:3px;
+  border-top:3px solid var(--orange);
+  box-shadow:0 8px 40px rgba(28,24,16,0.15);
+  padding:1.4rem 1.4rem 1.15rem;
+  animation:pop .24s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes pop{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.c-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.9rem}
+.c-lbl{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.58rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--cement2)}
+.c-x{background:none;border:none;cursor:pointer;color:var(--cement2);font-size:1rem;line-height:1;transition:color .15s}
+.c-x:hover{color:var(--ink)}
+
+.c-imgpre{display:none;margin-bottom:0.85rem;position:relative}
+.c-imgpre.on{display:block}
+.c-imgpre img{width:100%;max-height:190px;object-fit:cover;display:block;border-radius:var(--r)}
+.c-imgrm{position:absolute;top:0.4rem;right:0.4rem;background:rgba(28,24,16,0.65);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.68rem;display:flex;align-items:center;justify-content:center}
+
+.c-ta{width:100%;min-height:95px;border:none;outline:none;resize:none;font-family:'Lora',Georgia,serif;font-size:1rem;line-height:1.75;color:var(--ink);background:transparent;caret-color:var(--orange);margin-bottom:0.85rem}
+.c-ta::placeholder{color:var(--cement);font-style:italic}
+
+.c-foot{display:flex;align-items:center;justify-content:space-between;padding-top:0.75rem;border-top:1px solid var(--bg)}
+.c-foot-l{display:flex;align-items:center;gap:0.7rem}
+.attach-btn{background:none;border:none;cursor:pointer;padding:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--cement2);transition:color .15s}
+.attach-btn:hover{color:var(--orange)}
+.wc{font-family:'Barlow Condensed',sans-serif;font-size:0.62rem;letter-spacing:0.05em;color:var(--cement)}
+.wc.over{color:#CC3333}
+.btn-fix{background:var(--orange);color:#fff;border:none;border-radius:var(--r);padding:0.52rem 1.15rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:0.78rem;letter-spacing:0.08em;text-transform:uppercase;transition:background .15s}
+.btn-fix:hover{background:var(--orange-d)}
+.btn-fix:disabled{opacity:0.32;cursor:not-allowed}
+
+/* hint row under compose */
+.c-hint{font-family:'Barlow Condensed',sans-serif;font-size:0.58rem;letter-spacing:0.08em;color:var(--cement);margin-top:0.45rem;text-align:right}
+
+/* ─── LIGHTBOX ─────────────────── */
+#lb{position:fixed;inset:0;z-index:500;background:rgba(28,24,16,0.92);display:none;align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
+#lb.open{display:flex}
+#lb img{max-width:100%;max-height:88vh;object-fit:contain;border-radius:var(--r)}
+
+#file-in{display:none}
+</style>
+</head>
+<body>
+
+<!-- grain -->
+<svg id="grain" xmlns="http://www.w3.org/2000/svg"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">FRAM<span>E</span></div>
+  <div class="h-mid">
+    <span id="live-clock">00:00</span>
+    <div class="sync">
+      <div class="sdot" id="sdot"></div>
+      <span id="slbl">—</span>
+    </div>
+  </div>
+  <div class="h-right">
+    <button class="icon-btn" onclick="toggleSettings()" title="Settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    </button>
+    <button class="btn-new" onclick="openCompose()">+ Frame</button>
+  </div>
+</header>
+
+<!-- SETTINGS -->
+<div class="drawer-back" id="drawer-back" onclick="closeSettings()"></div>
+<div id="settings-drawer">
+  <div class="dr-head">
+    <span class="dr-title">GitHub Sync</span>
+    <button class="icon-btn" onclick="closeSettings()" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="dr-body">
+    <div class="field">
+      <label class="flbl" for="f-pat">Personal Access Token</label>
+      <input class="finput" id="f-pat" type="password" placeholder="ghp_...">
+      <div class="fhint">Needs <code>repo</code> scope. <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">Generate →</a></div>
+    </div>
+    <div class="field">
+      <label class="flbl" for="f-owner">GitHub Username</label>
+      <input class="finput" id="f-owner" type="text" placeholder="yourusername">
+    </div>
+    <div class="field">
+      <label class="flbl" for="f-repo">Repository Name</label>
+      <input class="finput" id="f-repo" type="text" placeholder="my-frames">
+      <div class="fhint">Empty repo, public works best for images.</div>
+    </div>
+    <button class="btn-save" onclick="saveSettings()">Connect →</button>
+    <button class="btn-disc" id="btn-disc" onclick="disconnect()">Disconnect</button>
+    <div class="dr-err" id="dr-err"></div>
+  </div>
+</div>
+
+<!-- WALL -->
+<main id="wall">
+  <div class="loading-wrap" id="loading-state">
+    <div class="spinner"></div>
+    <span>loading frames</span>
+  </div>
+  <div id="wall-content" style="display:none">
+    <div class="wall-meta">
+      <span><b id="cnt">0</b> frames</span>
+      <span class="meta-div">·</span>
+      <span id="word-total">0 words</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty-state" style="display:none">
+      <div class="empty-mark">◻</div>
+      <div class="empty-h">Nothing fixed yet.</div>
+      <div class="empty-s" id="empty-sub">Press + Frame to mark something.</div>
+    </div>
+  </div>
+</main>
+
+<!-- COMPOSE -->
+<div id="compose">
+  <div class="c-back" onclick="closeCompose()"></div>
+  <div class="c-panel">
+    <div class="c-top">
+      <span class="c-lbl" id="c-date">—</span>
+      <button class="c-x" onclick="closeCompose()">✕</button>
+    </div>
+    <div class="c-imgpre" id="c-imgpre">
+      <img id="c-preview" src="" alt="">
+      <button class="c-imgrm" onclick="removeImg()">✕</button>
+    </div>
+    <textarea class="c-ta" id="c-ta" placeholder="mark something." oninput="onInput()"></textarea>
+    <div class="c-foot">
+      <div class="c-foot-l">
+        <button class="attach-btn" onclick="document.getElementById('file-in').click()">↑ Photo</button>
+        <span class="wc" id="wc">0 / 100</span>
+      </div>
+      <button class="btn-fix" id="btn-fix" onclick="fixFrame()" disabled>Fix</button>
+    </div>
+    <div class="c-hint">⌘ + Enter to fix</div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lb" onclick="this.classList.remove('open')">
+  <img id="lb-img" src="" alt="">
+</div>
+
+<input type="file" id="file-in" accept="image/*" onchange="onFile(event)">
+
+<script>
+const GH='https://api.github.com';
+let cfg=null,frames=[],sha=null,pendingImg=null;
+
+const PROMPTS=[
+  'mark something.',
+  'what just happened.',
+  'fix this before it fades.',
+  'a line. nothing more.',
+  'something worth keeping.',
+  'the thought you almost didn\'t have.'
+];
+
+// ── INIT ──────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  const p=ls('fp'),o=ls('fo'),r=ls('fr');
+  startClock();
+  if(p&&o&&r){cfg={pat:p,owner:o,repo:r};fillForm();boot();}
+  else showNoCfg();
+});
+
+function ls(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lss(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function el(id){return document.getElementById(id)}
+function val(id){return el(id).value.trim()}
+
+function startClock(){
+  const tick=()=>{
+    const t=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    el('live-clock').textContent=t;
+  };tick();setInterval(tick,1000);
+}
+
+function fillForm(){
+  if(!cfg)return;
+  el('f-pat').value=cfg.pat||'';
+  el('f-owner').value=cfg.owner||'';
+  el('f-repo').value=cfg.repo||'';
+  el('btn-disc').style.display='block';
+}
+
+function showNoCfg(){
+  el('loading-state').style.display='none';
+  el('wall-content').style.display='block';
+  el('grid').innerHTML='';
+  el('empty-state').style.display='block';
+  el('empty-sub').innerHTML='Click the <span>⚙</span> above to connect GitHub and begin.';
+  setSyncState('—','');
+}
+
+// ── SETTINGS ──────────────────────────
+function toggleSettings(){el('settings-drawer').classList.contains('open')?closeSettings():openSettings()}
+function openSettings(){el('settings-drawer').classList.add('open');el('drawer-back').classList.add('open')}
+function closeSettings(){el('settings-drawer').classList.remove('open');el('drawer-back').classList.remove('open')}
+
+async function saveSettings(){
+  const pat=val('f-pat'),owner=val('f-owner'),repo=val('f-repo');
+  const errEl=el('dr-err');errEl.style.display='none';
+  if(!pat||!owner||!repo){errEl.textContent='All fields required.';errEl.style.display='block';return;}
+  try{
+    const r=await fetch(`${GH}/repos/${owner}/${repo}`,{headers:ghH(pat)});
+    if(!r.ok){const j=await r.json();throw new Error(j.message);}
+  }catch(e){errEl.textContent=`GitHub: ${e.message}`;errEl.style.display='block';return;}
+  lss('fp',pat);lss('fo',owner);lss('fr',repo);
+  cfg={pat,owner,repo};el('btn-disc').style.display='block';
+  closeSettings();boot();
+}
+
+function disconnect(){
+  if(!confirm('Disconnect? Frames stay in the repo.'))return;
+  ['fp','fo','fr'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  cfg=null;frames=[];sha=null;
+  el('btn-disc').style.display='none';
+  showNoCfg();
+}
+
+// ── GITHUB ──────────────────────────
+function ghH(pat){return{'Authorization':`token ${pat||cfg.pat}`,'Content-Type':'application/json','User-Agent':'FRAME-app'}}
+
+async function ghGet(path){
+  const r=await fetch(`${GH}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`,{headers:ghH()});
+  if(r.status===404)return null;
+  if(!r.ok)throw new Error('GH '+r.status);
+  return r.json();
+}
+async function ghPut(path,content,fileSha,msg){
+  const body={message:msg||path,content};
+  if(fileSha)body.sha=fileSha;
+  const r=await fetch(`${GH}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`,{method:'PUT',headers:ghH(),body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('Save failed');
+  return r.json();
+}
+async function ghDel(path,fileSha){
+  await fetch(`${GH}/repos/${cfg.owner}/${cfg.repo}/contents/${path}`,{method:'DELETE',headers:ghH(),body:JSON.stringify({message:`del ${path}`,sha:fileSha})});
+}
+
+// ── BOOT ──────────────────────────
+async function boot(){
+  setSyncState('LOADING','active');
+  el('loading-state').style.display='flex';
+  el('wall-content').style.display='none';
+  try{
+    const f=await ghGet('frames.json');
+    if(!f){frames=[];sha=null;}
+    else{sha=f.sha;const raw=decodeURIComponent(escape(atob(f.content.replace(/\n/g,''))));frames=JSON.parse(raw).frames||[];}
+    renderWall();setSyncState('SYNCED','ok');
+  }catch(e){setSyncState('ERROR','err');console.error(e);}
+}
+
+async function saveFrames(){
+  const b64=btoa(unescape(encodeURIComponent(JSON.stringify({frames},null,2))));
+  const res=await ghPut('frames.json',b64,sha,`frame ${new Date().toISOString()}`);
+  sha=res.content.sha;
+}
+
+// ── WALL ──────────────────────────
+function renderWall(){
+  el('loading-state').style.display='none';
+  el('wall-content').style.display='block';
+  const total=frames.reduce((s,f)=>s+(f.text?f.text.trim().split(/\s+/).length:0),0);
+  el('cnt').textContent=frames.length;
+  el('word-total').textContent=`${total.toLocaleString()} words`;
+  const grid=el('grid');
+  if(!frames.length){
+    grid.innerHTML='';el('empty-state').style.display='block';
+    el('empty-sub').textContent='Press + Frame to mark something.';return;
+  }
+  el('empty-state').style.display='none';
+  grid.innerHTML=frames.map((f,i)=>cardHTML(f,i)).join('');
+}
+
+// ── CARD RENDERING ──────────────────────────
+function pseudoRand(id){
+  let h=0;for(const c of String(id))h=((h<<5)-h)+c.charCodeAt(0);return Math.abs(h);
+}
+
+function dayPart(date){
+  const h=date.getHours();
+  if(h<6)return'NIGHT';if(h<12)return'MORNING';if(h<17)return'AFTERNOON';if(h<21)return'EVENING';return'NIGHT';
+}
+
+function fmtDate(d){
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase()+' · '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+// split text: first sentence becomes hero, rest is body
+function splitText(text){
+  if(!text)return{hero:'',rest:''};
+  const m=text.match(/^(.+?[.!?])\s*([\s\S]*)$/);
+  if(m&&m[1]&&m[2].length>0)return{hero:m[1],rest:m[2].trim()};
+  // no clear sentence end — if short use all as hero
+  const words=text.trim().split(/\s+/);
+  if(words.length<=14)return{hero:text,rest:''};
+  // split at ~40 chars or first newline
+  const nl=text.indexOf('\n');
+  if(nl>0&&nl<120)return{hero:text.slice(0,nl).trim(),rest:text.slice(nl+1).trim()};
+  return{hero:words.slice(0,10).join(' ')+'…',rest:words.slice(10).join(' ')};
+}
+
+// subtle tint variation
+const TINTS=['#FDFAF3','#FBF7EE','#FDF9F1','#FAF6EC','#FEFBF4'];
+
+function cardHTML(f,i){
+  const d=new Date(f.ts);
+  const rnd=pseudoRand(f.id);
+  const tint=TINTS[rnd%TINTS.length];
+  const dp=dayPart(d);
+  const date=fmtDate(d);
+  const delay=Math.min(i*28,300);
+  const words=f.text?f.text.trim().split(/\s+/).length:0;
+  const isOneliner=words<=12&&!f.img;
+  const {hero,rest}=splitText(f.text||'');
+
+  if(f.img){
+    // PHOTO CARD
+    const imgH=180+((rnd%3)*60); // vary image height: 180, 240, 300px
+    return `<div class="card card-photo" style="background:${tint};animation-delay:${delay}ms">
+      <img class="photo-img" src="${rawURL(f.img)}" style="height:${imgH}px" alt="" loading="lazy" onclick="openLB('${rawURL(f.img)}')">
+      <div class="photo-body">
+        ${hero?`<div class="photo-hero">${esc(hero)}${rest?` <span style="color:var(--ink3);font-size:0.82rem;font-weight:400;font-style:normal">${esc(rest)}</span>`:''}` : ''}${hero?'</div>':''}
+        <div class="photo-footer">
+          <div>
+            <div class="card-date">${date}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span class="daypart">${dp}</span>
+            <button class="del-btn" onclick="delFrame('${f.id}')">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if(isOneliner){
+    // ONELINER CARD
+    const sizes=['1.2rem','1.3rem','1.15rem','1.25rem'];
+    const fs=sizes[rnd%sizes.length];
+    return `<div class="card card-liner" style="background:${tint};animation-delay:${delay}ms">
+      <div class="liner-body">
+        <div class="liner-text" style="font-size:${fs}">${esc(f.text)}</div>
+      </div>
+      <div class="liner-footer">
+        <span class="card-date">${date}</span>
+        <div style="display:flex;align-items:center;gap:0.5rem">
+          <span class="daypart">${dp}</span>
+          <button class="del-btn" onclick="delFrame('${f.id}')">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // TEXT CARD
+  return `<div class="card card-text-type" style="background:${tint};animation-delay:${delay}ms">
+    <div class="text-hero">${esc(hero)}</div>
+    ${rest?`<div class="text-rest">${esc(rest)}</div>`:''}
+    <div class="text-footer">
+      <span class="card-date">${date}</span>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <span class="daypart">${dp}</span>
+        <button class="del-btn" onclick="delFrame('${f.id}')">✕</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function rawURL(ref){return`https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/${ref}`}
+
+async function delFrame(id){
+  if(!confirm('Remove this frame?'))return;
+  setSyncState('SAVING','active');
+  const frame=frames.find(f=>f.id===id);
+  frames=frames.filter(f=>f.id!==id);
+  try{
+    await saveFrames();
+    if(frame?.img){const imgF=await ghGet(frame.img);if(imgF)await ghDel(frame.img,imgF.sha);}
+    renderWall();setSyncState('SYNCED','ok');
+  }catch(e){setSyncState('ERROR','err');}
+}
+
+// ── COMPOSE ──────────────────────────
+function openCompose(){
+  const now=new Date();
+  el('c-date').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toUpperCase();
+  el('c-ta').placeholder=PROMPTS[Math.floor(Math.random()*PROMPTS.length)];
+  el('compose').classList.add('open');
+  setTimeout(()=>el('c-ta').focus(),80);
+}
+function closeCompose(){
+  el('compose').classList.remove('open');
+  el('c-ta').value='';
+  el('wc').textContent='0 / 100';el('wc').classList.remove('over');
+  el('btn-fix').disabled=true;removeImg();
+}
+function onInput(){
+  const t=el('c-ta').value;
+  const w=t.trim()?t.trim().split(/\s+/).length:0;
+  el('wc').textContent=`${w} / 100`;
+  el('wc').classList.toggle('over',w>100);
+  el('btn-fix').disabled=(!t.trim()&&!pendingImg)||w>100;
+}
+
+// ── IMAGE ──────────────────────────
+function onFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1400,Q=0.82;
+      let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const cvs=document.createElement('canvas');cvs.width=w;cvs.height=h;
+      cvs.getContext('2d').drawImage(img,0,0,w,h);
+      const url=cvs.toDataURL('image/jpeg',Q);
+      pendingImg={b64:url.split(',')[1],url};
+      el('c-preview').src=url;el('c-imgpre').classList.add('on');onInput();
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);e.target.value='';
+}
+function removeImg(){pendingImg=null;el('c-imgpre').classList.remove('on');el('c-preview').src='';onInput()}
+
+// ── FIX ──────────────────────────
+async function fixFrame(){
+  if(!cfg){openSettings();return;}
+  const text=el('c-ta').value.trim();
+  if(!text&&!pendingImg)return;
+  if(text&&text.split(/\s+/).length>100)return;
+  setSyncState('SAVING','active');el('btn-fix').disabled=true;
+  try{
+    const id=`f${Date.now()}`;
+    let imgRef=null;
+    if(pendingImg){await ghPut(`images/${id}.jpg`,pendingImg.b64,null,`img ${id}`);imgRef=`images/${id}.jpg`;}
+    frames.unshift({id,text,img:imgRef,ts:new Date().toISOString()});
+    await saveFrames();renderWall();setSyncState('SYNCED','ok');closeCompose();
+  }catch(e){setSyncState('ERROR','err');console.error(e);el('btn-fix').disabled=false;}
+}
+
+// ── LIGHTBOX ──────────────────────────
+function openLB(src){el('lb-img').src=src;el('lb').classList.add('open')}
+
+// ── UTIL ──────────────────────────
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}
+function setSyncState(label,state){const dot=el('sdot');dot.className='sdot';if(state)dot.classList.add(state);el('slbl').textContent=label}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeCompose();el('lb').classList.remove('open');closeSettings();}
+  if((e.metaKey||e.ctrlKey)&&e.key==='Enter')fixFrame();
+});
+</script>
+</body>
+</html>
