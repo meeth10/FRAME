@@ -51,6 +51,19 @@ header{
 .btn-new{background:var(--ink);color:var(--white);border:none;border-radius:var(--r);padding:.48rem .95rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.07em;text-transform:uppercase;transition:background .15s}
 .btn-new:hover{background:var(--brown)}
 
+/* ─── FILTER (hidden by default, revealed on demand) ─────────────────── */
+.filter-wrap{position:relative}
+.filter-wrap .icon-btn{position:relative}
+.filter-badge{position:absolute;top:1px;right:1px;width:6px;height:6px;border-radius:50%;background:var(--orange)}
+.filter-pop{position:absolute;top:calc(100% + 10px);right:0;background:var(--surface);border:1px solid var(--cement);border-top:2px solid var(--brown);border-radius:var(--r);box-shadow:0 8px 24px rgba(28,24,16,.14);padding:.6rem;min-width:180px;display:none;z-index:150}
+.filter-pop.open{display:block}
+.filter-pop-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.55rem;letter-spacing:.13em;text-transform:uppercase;color:var(--cement2);margin-bottom:.45rem;padding:0 .3rem}
+.filter-chip{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.42rem .5rem;border-radius:var(--r);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.03em;color:var(--ink2);transition:background .15s}
+.filter-chip:hover{background:var(--brown-b)}
+.filter-chip.active{color:var(--orange);font-weight:700}
+.filter-chip .fc-count{font-size:.62rem;color:var(--cement2);flex-shrink:0}
+.filter-active-tag{color:var(--orange);cursor:pointer;font-weight:700}
+
 /* ─── SETTINGS DRAWER ─────────────────── */
 #drawer{position:fixed;top:0;right:0;bottom:0;z-index:300;width:300px;background:var(--surface);border-left:1px solid var(--cement);transform:translateX(100%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow-y:auto}
 #drawer.open{transform:translateX(0)}
@@ -166,6 +179,14 @@ header{
 .c-foot-l{display:flex;align-items:center;gap:.7rem}
 .attach-btn{background:none;border:none;cursor:pointer;padding:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cement2);transition:color .15s}
 .attach-btn:hover{color:var(--orange)}
+.tag-toggle{background:none;border:none;cursor:pointer;padding:0;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--cement2);transition:color .15s}
+.tag-toggle:hover{color:var(--orange)}
+.tag-toggle.active{color:var(--orange)}
+.tag-row{display:none;flex-wrap:wrap;gap:.4rem;margin-top:.75rem}
+.tag-row.open{display:flex}
+.tag-chip{padding:.3rem .65rem;border:1px solid var(--cement);border-radius:20px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);cursor:pointer;transition:all .15s;background:transparent}
+.tag-chip:hover{border-color:var(--orange);color:var(--orange)}
+.tag-chip.sel{background:var(--orange);border-color:var(--orange);color:#fff}
 .wc{font-family:'Barlow Condensed',sans-serif;font-size:.62rem;letter-spacing:.05em;color:var(--cement)}
 .wc.over{color:#CC3333}
 .btn-fix{background:var(--orange);color:#fff;border:none;border-radius:var(--r);padding:.52rem 1.15rem;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;transition:background .15s}
@@ -197,6 +218,16 @@ header{
     </div>
   </div>
   <div class="h-right">
+    <div class="filter-wrap" id="filter-wrap">
+      <button class="icon-btn" id="filter-btn" onclick="toggleFilterPop(event)" title="Filter" aria-label="Filter">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41L11 3.83A2 2 0 009.59 3.24L4 3a1 1 0 00-1 1l.24 5.59a2 2 0 00.59 1.41l9.58 9.58a2 2 0 002.83 0l4.35-4.35a2 2 0 000-2.82z"/><circle cx="7.5" cy="7.5" r="1.4" fill="currentColor" stroke="none"/></svg>
+        <span class="filter-badge" id="filter-badge" style="display:none"></span>
+      </button>
+      <div class="filter-pop" id="filter-pop">
+        <div class="filter-pop-title">Filter by category</div>
+        <div id="filter-pop-body"></div>
+      </div>
+    </div>
     <button class="icon-btn" id="settings-btn" onclick="toggleDrawer()" title="Settings" aria-label="Settings">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
     </button>
@@ -286,10 +317,12 @@ header{
     <div class="c-foot">
       <div class="c-foot-l">
         <button class="attach-btn" onclick="document.getElementById('file-in').click()">↑ Photo</button>
+        <button class="tag-toggle" id="tag-toggle" onclick="toggleTagRow()">+ Tag</button>
         <span class="wc" id="wc">0 / 100</span>
       </div>
       <button class="btn-fix" id="btn-fix" onclick="fixFrame()" disabled>Fix</button>
     </div>
+    <div class="tag-row" id="tag-row"></div>
     <div class="c-hint">⌘ + Enter to fix</div>
   </div>
 </div>
@@ -306,6 +339,17 @@ const GH = 'https://api.github.com';
 let cfg = null, frames = [], sha = null, pendingImg = null;
 // image cache: path -> dataURL (avoids re-fetching same image)
 const imgCache = new Map();
+
+// ── CATEGORIES (hidden from the wall — used for tagging + filtering only) ──
+const CATEGORIES = [
+  { key: 'people',      label: 'People' },
+  { key: 'experiences',  label: 'Experiences' },
+  { key: 'places',      label: 'Places' },
+  { key: 'quotes',      label: 'Quotes' },
+  { key: 'others',      label: 'Others' }
+];
+let pendingCategory = null; // category chosen in compose, before saving
+let activeFilter = null;    // category currently filtering the wall (null = all)
 
 const PROMPTS = [
   'mark something.',
@@ -508,19 +552,39 @@ async function saveFrames() {
 function renderWall() {
   el('loading-state').style.display = 'none';
   el('wall-content').style.display = 'block';
-  const total = frames.reduce((s, f) => s + (f.text ? f.text.trim().split(/\s+/).length : 0), 0);
-  el('cnt').textContent = frames.length;
+
+  const view = activeFilter ? frames.filter(f => f.category === activeFilter) : frames;
+  const total = view.reduce((s, f) => s + (f.text ? f.text.trim().split(/\s+/).length : 0), 0);
+  el('cnt').textContent = view.length;
   el('word-total').textContent = total.toLocaleString() + ' words';
+
+  const metaFilterEl = el('meta-filter');
+  if (metaFilterEl) metaFilterEl.remove();
+  if (activeFilter) {
+    const lbl = CATEGORIES.find(c => c.key === activeFilter)?.label || activeFilter;
+    const span = document.createElement('span');
+    span.id = 'meta-filter';
+    span.innerHTML = `<span class="meta-dot">·</span> <span class="filter-active-tag" onclick="setFilter(null)">${lbl} ✕</span>`;
+    span.style.display = 'contents';
+    el('wall-meta-inner') ? el('wall-meta-inner').appendChild(span) : document.querySelector('.wall-meta').appendChild(span);
+  }
+
   const grid = el('grid');
-  if (!frames.length) {
+  if (!view.length) {
     grid.innerHTML = '';
     el('empty-state').style.display = 'block';
-    el('empty-h').textContent = 'Nothing fixed yet.';
-    el('empty-s').textContent = 'Press + Frame to mark something.';
+    if (activeFilter) {
+      const lbl = CATEGORIES.find(c => c.key === activeFilter)?.label || activeFilter;
+      el('empty-h').textContent = `No frames tagged ${lbl}.`;
+      el('empty-s').textContent = 'Try a different filter, or clear it.';
+    } else {
+      el('empty-h').textContent = 'Nothing fixed yet.';
+      el('empty-s').textContent = 'Press + Frame to mark something.';
+    }
     return;
   }
   el('empty-state').style.display = 'none';
-  grid.innerHTML = frames.map((f, i) => cardHTML(f, i)).join('');
+  grid.innerHTML = view.map((f, i) => cardHTML(f, i)).join('');
 }
 
 // ── CARD RENDERING ─────────────────────────────────
@@ -624,6 +688,40 @@ async function delFrame(id) {
   }
 }
 
+// ── FILTER (hidden categories, revealed on demand) ─────────────────────────────────
+function toggleFilterPop(e) {
+  if (e) e.stopPropagation();
+  const pop = el('filter-pop');
+  if (pop.classList.contains('open')) { closeFilterPop(); return; }
+  buildFilterChips();
+  pop.classList.add('open');
+}
+function closeFilterPop() {
+  el('filter-pop').classList.remove('open');
+}
+function buildFilterChips() {
+  const counts = {};
+  frames.forEach(f => { const c = f.category; if (c) counts[c] = (counts[c] || 0) + 1; });
+  let html = `<div class="filter-chip${activeFilter === null ? ' active' : ''}" onclick="setFilter(null)">
+    <span>All</span><span class="fc-count">${frames.length}</span>
+  </div>`;
+  html += CATEGORIES.map(c => `<div class="filter-chip${activeFilter === c.key ? ' active' : ''}" onclick="setFilter('${c.key}')">
+    <span>${c.label}</span><span class="fc-count">${counts[c.key] || 0}</span>
+  </div>`).join('');
+  el('filter-pop-body').innerHTML = html;
+}
+function setFilter(key) {
+  activeFilter = key;
+  closeFilterPop();
+  const badge = el('filter-badge');
+  badge.style.display = activeFilter ? 'block' : 'none';
+  renderWall();
+}
+document.addEventListener('click', (e) => {
+  const wrap = el('filter-wrap');
+  if (wrap && !wrap.contains(e.target)) closeFilterPop();
+});
+
 // ── COMPOSE ─────────────────────────────────
 function openCompose() {
   const now = new Date();
@@ -631,6 +729,11 @@ function openCompose() {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   }).toUpperCase();
   el('c-ta').placeholder = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
+  pendingCategory = null;
+  el('tag-row').classList.remove('open');
+  el('tag-toggle').classList.remove('active');
+  el('tag-toggle').textContent = '+ Tag';
+  buildTagChips();
   el('compose').classList.add('open');
   setTimeout(() => el('c-ta').focus(), 80);
 }
@@ -640,7 +743,28 @@ function closeCompose() {
   el('wc').textContent = '0 / 100';
   el('wc').classList.remove('over');
   el('btn-fix').disabled = true;
+  pendingCategory = null;
+  el('tag-row').classList.remove('open');
+  el('tag-toggle').classList.remove('active');
+  el('tag-toggle').textContent = '+ Tag';
   removeImg();
+}
+function toggleTagRow() {
+  const open = el('tag-row').classList.toggle('open');
+  el('tag-toggle').classList.toggle('active', open);
+}
+function buildTagChips() {
+  el('tag-row').innerHTML = CATEGORIES.map(c =>
+    `<button type="button" class="tag-chip${pendingCategory === c.key ? ' sel' : ''}" onclick="selectCategory('${c.key}')">${c.label}</button>`
+  ).join('');
+}
+function selectCategory(key) {
+  pendingCategory = (pendingCategory === key) ? null : key;
+  buildTagChips();
+  el('tag-toggle').textContent = pendingCategory
+    ? CATEGORIES.find(c => c.key === pendingCategory).label
+    : '+ Tag';
+  el('tag-toggle').classList.toggle('active', !!pendingCategory);
 }
 function onInput() {
   const t = el('c-ta').value;
@@ -707,7 +831,7 @@ async function fixFrame() {
       imgCache.set(path, pendingImg.url);
     }
 
-    frames.unshift({ id, text, img: imgRef, ts: new Date().toISOString() });
+    frames.unshift({ id, text, img: imgRef, ts: new Date().toISOString(), category: pendingCategory });
     await saveFrames();
     renderWall();
     setSyncState('SYNCED', 'ok');
@@ -745,6 +869,7 @@ document.addEventListener('keydown', e => {
     closeCompose();
     el('lb').classList.remove('open');
     closeDrawer();
+    closeFilterPop();
   }
   if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') fixFrame();
 });
